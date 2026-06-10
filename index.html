@@ -1,167 +1,131 @@
-/**
- * 👑 KERO DIGITAL ECOSYSTEM - CENTRAL BACKEND BRAIN (2026)
- * المخ المركزي المطور: مدمج به عناكب البحث، نظام الأرشفة، وترتيب النتائج الأولى لـ KeroSearch Pro
- */
-
-const express = require('express');
-const cors = require('cors');
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-// 💾 قاعدة البيانات المركزية والأرشيف المفهرس عبر عناكب كيرو
-const keroCentralDatabase = {
-    // 1️⃣ حسابات المستخدمين الموحدة (Kero ID)
-    users: {
-        "mkerolos726@gmail.com": {
-            name: "Kirollos Maher",
-            points: 500,
-            downloadedGames: []
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kero Global Application</title>
+    <style>
+        /* 🎨 الـ Premium Dark UI الخاص بشركة كيرو تكنولوجي */
+        body {
+            background-color: #070a13;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
         }
-    },
-
-    // 2️⃣ الأرشيف المركزي المفرز (Search Index) - الصفحات اللي جمعتها العناكب ورتبتها الخوارزمية
-    searchIndex: [
-        { 
-            url: "https://zambo-animation.com/live", 
-            title: "قناة زمبو أنيميشن | البث الرسمي المباشر للدبلجة المصرية", 
-            description: "شاهد كارتون ومغامرات زمبو بالعامية المصرية بجودة عالية على مدار 24 ساعة.",
-            keywords: ["زمبو", "انميشن", "كارتون", "دبلجة", "مصر"],
-            rankScore: 98, // مجموع النقاط لترشيحه في النتيجة الأولى
-            clicks: 12500
-        },
-        { 
-            url: "https://kero-video.com/trending", 
-            title: "منصة Kero Video | استوديو صناع المحتوى والربح بالنقاط", 
-            description: "ابدأ برفع فيديوهاتك على كيرو فيديو واجمع النقاط واستبدلها بألعاب فورية.",
-            keywords: ["كيرو فيديو", "فيديوهات", "يوتيوب", "ربح", "نقاط"],
-            rankScore: 95,
-            clicks: 9800
-        },
-        { 
-            url: "https://kero-play.com/store", 
-            title: "متجر Kero Play | تحميل ألعاب الموبايل والكمبيوتر مجاناً بالنقاط", 
-            description: "نزل ألعابك المفضلة بشكل طبيعي على جهازك من خلال رصيد نقاط كيرو الموحد.",
-            keywords: ["العاب", "تحميل", "تنزيل", "كيرو بلاي", "متجر"],
-            rankScore: 90,
-            clicks: 7400
+        .app-container {
+            width: 100%;
+            max-width: 650px;
+            background: #0f1626;
+            border: 1px solid #2d3748;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         }
-    ],
-
-    // 3️⃣ سجل العناكب (Crawl Logs) - لمراقبة زحف العناكب في الخفاء
-    crawlerLogs: [
-        { time: "9:30 م", event: "العنكبوت KeroSpider-01 زار موقع زمبو وأرشف كلمات جديدة بنجاح." }
-    ],
-
-    keroPlayStore: [
-        { id: "game_1", name: "🏎️ سباق السيارات المذهلة برو", cost: 100, downloadUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
-    ]
-};
-
-// ==========================================
-// 🔍 نظام عناكب البحث والأرشفة الفوري (Kero Crawling Engine)
-// ==========================================
-
-// رابط خفي تطلقه العناكب أوتوماتيكياً لإضافة وأرشفة صفحة جديدة بالسيستم وترشيحها
-app.post('/api/search/crawler-archive', (req, res) => {
-    const { targetUrl, pageTitle, pageDescription, pageKeywords } = req.body;
-    
-    console.log(`[🕷️ عناكب كيرو]: جاري فحص وزحف الرابط في الخفاء: ${targetUrl}`);
-
-    // إنشاء هيكل الصفحة داخل الأرشيف وإعطائها تقييم أولي (Rank Score)
-    const archivedPage = {
-        url: targetUrl,
-        title: pageTitle,
-        description: pageDescription,
-        keywords: pageKeywords || [],
-        rankScore: 50, // تبدأ بـ 50 وترتفع مع كثرة الزيارات والنقرات
-        clicks: 0
-    };
-
-    keroCentralDatabase.searchIndex.push(archivedPage);
-    
-    // تسجيل العملية في سجل العناكب
-    keroCentralDatabase.crawlerLogs.unshift({
-        time: new Date().toLocaleTimeString('ar-EG'),
-        event: `العنكبوت قام بأرشفة صفحة جديدة: (${pageTitle}) وجاهزة للترشيح.`
-    });
-
-    res.json({ success: true, message: "تمت الأرشفة بنجاح بواسطة العناكب وتم تنظيم الصفحة في السيرفر." });
-});
-
-
-// ==========================================
-// 🔍 محرك الاستعلام والترشيح الذكي (KeroSearch Pro Query)
-// ==========================================
-app.post('/api/search/query', (req, res) => {
-    const { searchQuery, userEmail } = req.body;
-    console.log(`[🔍 إشارة بحث]: المستخدم (${userEmail}) يبحث عن: "${searchQuery}"`);
-
-    // تصحيح فوري سحري لو الكلمة مكتوبة غلط بالخلفية
-    let cleanQuery = searchQuery.trim().toLowerCase();
-    if (cleanQuery === "ذر زمبو" || cleanQuery.includes("انميشن")) {
-        cleanQuery = "زمبو";
-    }
-
-    // 🧠 خوارزمية البحث والترشيح (Kero Ranking Algorithm):
-    // 1. البحث في الأرشيف عن الصفحات المتطابقة مع الكلمات المفتاحية
-    // 2. ترتيب النتائج تنازلياً من الأعلى للأقل حسب الـ rankScore عشان تظهر في "النتائج الأولى" بالظبط زي جوجل
-    let matchedResults = keroCentralDatabase.searchIndex.filter(page => {
-        return page.title.toLowerCase().includes(cleanQuery) || 
-               page.description.toLowerCase().includes(cleanQuery) ||
-               page.keywords.some(kw => kw.toLowerCase().includes(cleanQuery));
-    });
-
-    // الترتيب لتظهر المواقع الأقوى والأعلى نقرات في البداية (جوجل سيستم)
-    matchedResults.sort((a, b) => b.rankScore - a.rankScore);
-
-    // زيادة النقاط للمستخدم في الخفاء تشجيعاً له على البحث
-    if (keroCentralDatabase.users[userEmail]) {
-        keroCentralDatabase.users[userEmail].points += 1;
-    }
-
-    res.json({
-        success: true,
-        correctedQuery: cleanQuery === searchQuery ? null : "زمبو أنيميشن",
-        resultsCount: matchedResults.length,
-        results: matchedResults, // قائمة الصفحات المرتبة والمنظمة في النتائج الأولى
-        adSection: {
-            title: "📢 إعلان ممول مستهدف عبر Kero Media AI",
-            link: "https://kero-digital.com"
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
         }
-    });
-});
+        .points-badge {
+            background: #1e293b;
+            border: 1px solid #10b981; /* الزمردي الأخضر للمؤشرات المالية */
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .section-title {
+            color: #facc15; /* الذهب الفاخر للعناوين الرئيسية */
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .kero-input {
+            width: 100%;
+            background: #1e293b;
+            border: 1px solid #4a5568;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            box-sizing: border-box;
+            outline: none;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        .kero-input:focus { border-color: #facc15; }
+        .btn-gold {
+            background: linear-gradient(135deg, #facc15, #eab308);
+            color: black;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(250, 204, 21, 0.2); }
+        .game-box {
+            background: #070a13;
+            border: 1px solid #2d3748;
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .results-panel {
+            background: #070a13;
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
 
-// ==========================================
-// 🎮 بوابات الحساب الموحد ومتجر الألعاب (Kero ID & Play)
-// ==========================================
-app.post('/api/auth/sso', (req, res) => {
-    const { email, platform } = req.body;
-    if (!keroCentralDatabase.users[email]) {
-        keroCentralDatabase.users[email] = { name: email.split('@')[0], points: 100, downloadedGames: [] };
-    }
-    res.json({ authenticated: true, email: email, points: keroCentralDatabase.users[email].points });
-});
+    <div class="app-container">
+        <div class="app-header">
+            <h2 style="margin:0; font-size: 1.4rem;">إمبراطورية كيرو الموحدة 🚀</h2>
+            <div class="points-badge">💰 الرصيد الموحد: <span id="user-points">500</span> نقطة</div>
+        </div>
 
-app.post('/api/play/download-trigger', (req, res) => {
-    const { userEmail, gameId } = req.body;
-    const user = keroCentralDatabase.users[userEmail];
-    const game = keroCentralDatabase.keroPlayStore.find(g => g.id === gameId);
+        <div style="margin-bottom: 40px;">
+            <h3 class="section-title">🔍 محرك البحث الذكي KeroSearch Pro</h3>
+            <input type="text" id="search-input" class="kero-input" value="ذر زمبو انميشن" placeholder="اكتب ما تبحث عنه هنا...">
+            <button class="btn-gold" onclick="triggerKeroSearch()">بحث وترشيح النتيجة الأولى ⚡</button>
+            
+            <div class="results-panel" id="search-results">
+                <p style="color: #94a3b8; margin: 0;">نتائج زحف العناكب وتصحيح الكلمات ستظهر هنا في النتيجة الأولى...</p>
+            </div>
+        </div>
 
-    if (user && game && user.points >= game.cost) {
-        user.points -= game.cost;
-        res.json({ status: "APPROVED", remainingPoints: user.points, downloadUrl: game.downloadUrl });
-    } else {
-        res.status(400).json({ error: "فشل التحميل، تحقق من النقاط" });
-    }
-});
+        <div>
+            <h3 class="section-title">🎮 متجر الألعاب الفوري Kero Play</h3>
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-top: -10px;">تحميل مباشر وطبيعي إلى ملفات جهازك بالنقاط:</p>
+            
+            <div class="game-box">
+                <div>
+                    <h4 style="margin: 0 0 5px 0;">🏎️ سباق السيارات المذهلة برو</h4>
+                    <span style="color: #facc15; font-size: 0.85rem;">السعر: 100 نقطة في الخفاء</span>
+                </div>
+                <button style="background: #10b981; color: white; border:none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;" 
+                        onclick="triggerGameDownload('game_1', 'سباق السيارات المذهلة برو')">
+                    تنزيل للجهاز 📥
+                </button>
+            </div>
+        </div>
+    </div>
 
-// تشغيل السيرفر المركزي
-const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(`================================================================`);
-    console.log(`🧠 المخ المركزي الشامل نشط ومدمج به عناكب البحث والأرشفة الذكية!`);
-    console.log(`🌐 نظام ترتيب نتائج البحث الموحد يعمل الآن على: http://localhost:${PORT}`);
-    console.log(`================================================================`);
-});
+    <script src="app.js"></script>
+</body>
+                                                           </html>
